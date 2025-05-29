@@ -1,9 +1,11 @@
 # Authentication and User Profile Implementation
 
 ## Setup and Configuration
-- [ ] Create Supabase client configuration
-- [ ] Set up environment variables for Supabase URL and API key
-- [ ] Create auth store using Pinia for centralized state management
+- [x] Create Supabase client configuration
+- [x] Set up environment variables for Supabase URL and API key
+- [x] Create auth store using Pinia for centralized state management
+
+**Note:** You'll need to add your Supabase project URL and anon key to the `.env` file
 
 ## Components
 - [ ] Create NavBar component
