@@ -1,23 +1,20 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import { RouterView } from 'vue-router'
+import { useAuthStore } from './stores/auth'
+import NavBar from './components/NavBar.vue'
+
+// Initialize auth store
+const authStore = useAuthStore()
+authStore.initialize()
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
+  <div class="min-h-screen bg-gray-50">
+    <NavBar />
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <RouterView />
+    </main>
+  </div>
 </template>
 
 <style scoped>

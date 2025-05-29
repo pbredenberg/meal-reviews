@@ -8,9 +8,9 @@
 **Note:** You'll need to add your Supabase project URL and anon key to the `.env` file
 
 ## Components
-- [ ] Create NavBar component
-  - [ ] Implement conditional rendering for auth/non-auth states
-  - [ ] Add navigation links (login, signup, profile, logout)
+- [x] Create NavBar component
+  - [x] Implement conditional rendering for auth/non-auth states
+  - [x] Add navigation links (login, signup, profile, logout)
 - [ ] Create LoadingSpinner component for async operations
 
 ## Views
