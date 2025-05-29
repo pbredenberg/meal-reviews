@@ -1,28 +1,25 @@
 <template>
-  <nav class="bg-white shadow">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between h-16">
-        <div class="flex">
-          <router-link to="/" class="flex items-center">
-            <span class="text-xl font-bold text-gray-800">Meal Reviews</span>
+  <nav class="navbar">
+    <div class="container">
+      <div class="nav-content">
+        <div class="nav-brand">
+          <router-link to="/">
+            <span>Meal Reviews</span>
           </router-link>
         </div>
 
-        <div class="flex items-center">
-          <div v-if="isLoading" class="mr-4">
+        <div class="nav-items">
+          <div v-if="isLoading" class="loading">
             <LoadingSpinner :size="4" />
           </div>
           
           <template v-if="isAuthenticated">
-            <router-link
-              to="/profile"
-              class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-            >
+            <router-link to="/profile" class="nav-link">
               Profile
             </router-link>
             <button
               @click="handleLogout"
-              class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+              class="nav-link"
               :disabled="isLoading"
             >
               Log out
@@ -30,16 +27,10 @@
           </template>
           
           <template v-else>
-            <router-link
-              to="/login"
-              class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-            >
+            <router-link to="/login" class="nav-link">
               Log in
             </router-link>
-            <router-link
-              to="/signup"
-              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium ml-3"
-            >
+            <router-link to="/signup" class="nav-link signup">
               Sign up
             </router-link>
           </template>
@@ -48,6 +39,56 @@
     </div>
   </nav>
 </template>
+
+<style scoped>
+.navbar {
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.container {
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.nav-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 4rem;
+}
+
+.nav-brand span {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.nav-items {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.loading {
+  margin-right: 1rem;
+}
+
+.nav-link {
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+}
+
+button.nav-link {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+button.nav-link:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+</style>
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'

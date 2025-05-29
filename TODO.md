@@ -14,10 +14,10 @@
 - [x] Create LoadingSpinner component for async operations
 
 ## Views
-- [ ] Create SignUp view
-  - [ ] Implement sign up form
-  - [ ] Add form validation
-  - [ ] Handle successful signup and redirect
+- [x] Create SignUp view
+  - [x] Implement sign up form
+  - [x] Add form validation
+  - [x] Handle successful signup and redirect
 - [ ] Create LogIn view
   - [ ] Implement login form
   - [ ] Add form validation
