@@ -18,17 +18,17 @@
   - [x] Implement sign up form
   - [x] Add form validation
   - [x] Handle successful signup and redirect
-- [ ] Create LogIn view
-  - [ ] Implement login form
-  - [ ] Add form validation
-  - [ ] Handle successful login and redirect
+- [x] Create LogIn view
+  - [x] Implement login form
+  - [x] Add form validation
+  - [x] Handle successful login and redirect
 - [ ] Create Profile view
   - [ ] Display user information
   - [ ] Add profile editing functionality
 
 ## Router
-- [ ] Set up route guards for protected routes
-- [ ] Configure route redirects for auth state changes
+- [x] Set up route guards for protected routes
+- [x] Configure route redirects for auth state changes
 
 ## Store
 - [ ] Implement auth store actions
