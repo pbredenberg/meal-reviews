@@ -11,7 +11,7 @@
 - [x] Create NavBar component
   - [x] Implement conditional rendering for auth/non-auth states
   - [x] Add navigation links (login, signup, profile, logout)
-- [ ] Create LoadingSpinner component for async operations
+- [x] Create LoadingSpinner component for async operations
 
 ## Views
 - [ ] Create SignUp view

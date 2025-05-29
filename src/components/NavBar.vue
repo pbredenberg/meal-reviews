@@ -10,7 +10,7 @@
 
         <div class="flex items-center">
           <div v-if="isLoading" class="mr-4">
-            Loading...
+            <LoadingSpinner :size="4" />
           </div>
           
           <template v-if="isAuthenticated">
@@ -53,6 +53,7 @@
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
+import LoadingSpinner from './LoadingSpinner.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
