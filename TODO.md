@@ -22,21 +22,21 @@
   - [x] Implement login form
   - [x] Add form validation
   - [x] Handle successful login and redirect
-- [ ] Create Profile view
-  - [ ] Display user information
-  - [ ] Add profile editing functionality
+- [x] Create Profile view
+  - [x] Display user information
+  - [x] Add profile editing functionality
 
 ## Router
 - [x] Set up route guards for protected routes
 - [x] Configure route redirects for auth state changes
 
 ## Store
-- [ ] Implement auth store actions
-  - [ ] signUp
-  - [ ] logIn
-  - [ ] logOut
-  - [ ] fetchProfile
-  - [ ] updateProfile
+- [x] Implement auth store actions
+  - [x] signUp
+  - [x] logIn
+  - [x] logOut
+  - [x] fetchProfile
+  - [x] updateProfile
 - [ ] Add loading and error states
 - [ ] Add persistence for auth state
 
