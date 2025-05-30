@@ -1,14 +1,34 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import { useMealsStore } from '@/stores/meals'
 import { useAuthStore } from '@/stores/auth'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 
+const router = useRouter()
 const mealsStore = useMealsStore()
 const authStore = useAuthStore()
 
+const { meals, loading, error, sortedMeals } = storeToRefs(mealsStore)
+const { isAuthenticated } = storeToRefs(authStore)
+
+async function loadMeals() {
+  const result = await mealsStore.fetchMeals()
+  if (!result.success) {
+    console.error('Failed to load meals:', result.error)
+  }
+}
+
 onMounted(() => {
-  mealsStore.fetchMeals()
+  loadMeals()
+})
+
+// Reload meals when navigating back to this route
+router.afterEach((to) => {
+  if (to.name === 'home') {
+    loadMeals()
+  }
 })
 </script>
 
@@ -16,25 +36,25 @@ onMounted(() => {
   <main class="meals-container">
     <div class="meals-header">
       <h1>Meal Reviews</h1>
-      <RouterLink v-if="authStore.isAuthenticated" to="/meals/new" class="add-meal-button">
+      <RouterLink v-if="isAuthenticated" to="/meals/new" class="add-meal-button">
         Add New Meal
       </RouterLink>
     </div>
 
-    <div v-if="mealsStore.loading" class="loading-container">
+    <div v-if="loading" class="loading-container">
       <LoadingSpinner :size="6" />
     </div>
 
-    <div v-else-if="mealsStore.error" class="error-alert">
-      {{ mealsStore.error }}
+    <div v-else-if="error" class="error-alert">
+      {{ error }}
     </div>
 
-    <div v-else-if="mealsStore.meals.length === 0" class="empty-state">
+    <div v-else-if="meals.length === 0" class="empty-state">
       <p>No meals have been added yet.</p>
     </div>
 
     <div v-else class="meals-list">
-      <article v-for="meal in mealsStore.sortedMeals" :key="meal.id" class="meal-card">
+      <article v-for="meal in sortedMeals" :key="meal.id" class="meal-card">
         <h2>{{ meal.name }}</h2>
         <p v-if="meal.description">{{ meal.description }}</p>
       </article>
