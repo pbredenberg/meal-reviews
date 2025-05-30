@@ -19,13 +19,23 @@ export const useMealsStore = defineStore('meals', () => {
     error.value = null
 
     try {
-      const { data, error: fetchError } = await supabase
+      // Fetch meals
+      const { data: mealsData, error: fetchError } = await supabase
         .from('meals')
         .select('*')
         .order('created_at', { ascending: false })
 
       if (fetchError) throw fetchError
-      meals.value = data
+      
+      // For now, we'll just use the meals data without review counts
+      // In a real app, you would fetch review counts from a reviews table
+      // or use a database view that includes counts
+      const processedMeals = mealsData.map(meal => ({
+        ...meal,
+        reviewCount: 0 // Default to 0 for now
+      }))
+      
+      meals.value = processedMeals
       return { success: true }
     } catch (e) {
       error.value = (e as Error).message

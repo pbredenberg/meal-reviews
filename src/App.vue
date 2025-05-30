@@ -9,74 +9,98 @@ authStore.initialize()
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="app-wrapper">
+    <a href="#main-content" class="skip-to-content">Skip to content</a>
     <NavBar />
-    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-      <RouterView />
+    <main id="main-content" tabindex="-1">
+      <div class="container">
+        <RouterView />
+      </div>
     </main>
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-logo">
+            <router-link to="/">Meal Reviews</router-link>
+          </div>
+          <div class="footer-links">
+            <router-link to="/">Home</router-link>
+            <router-link to="/about">About</router-link>
+            <router-link to="/profile">Profile</router-link>
+          </div>
+          <div class="footer-copyright">
+            <p>&copy; {{ new Date().getFullYear() }} Meal Reviews. All rights reserved.</p>
+          </div>
+        </div>
+      </div>
+    </footer>
   </div>
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+main {
+  flex: 1;
+  padding: var(--space-4) 0;
 }
 
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
+.site-footer {
+  background-color: var(--color-background-soft);
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-6) 0;
+  margin-top: var(--space-8);
 }
 
-nav a.router-link-exact-active {
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.footer-logo a {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.footer-links a {
   color: var(--color-text);
 }
 
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
+.footer-links a:hover {
+  color: var(--color-primary);
 }
 
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
+.footer-copyright {
+  color: var(--color-text-light);
+  font-size: 0.875rem;
 }
 
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
+/* Responsive styles */
+@media (min-width: 768px) {
+  .footer-content {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
   }
-
-  .logo {
-    margin: 0 2rem 0 0;
+  
+  .footer-links {
+    order: 2;
   }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
+  
+  .footer-copyright {
+    order: 3;
   }
 }
 </style>
