@@ -59,7 +59,7 @@ A Vue 3 application for reviewing meals, built with Vite, TypeScript, and Supaba
 5. **Create a test user**
 
    ```sh
-   npm run init
+   npm run init-test-data
    ```
 
    This will create a test user with the following credentials:
