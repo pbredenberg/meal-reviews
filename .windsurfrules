@@ -1,0 +1,2 @@
+- be careful to use correct HTML and avoid accidentally using HTML entities, primarily &lt; instead of <. This should be avoided.
+- when writing TypeScript, don't use `any` as a type. define the type
