@@ -15,14 +15,19 @@
       class="meal-image"
       loading="lazy"
     />
-    <div v-else class="meal-placeholder" :style="{ backgroundColor: placeholderColor }">
-      <span class="placeholder-text" :style="{ fontSize: `${fontSize}rem` }">{{ placeholderText }}</span>
-    </div>
+    <img 
+      v-else 
+      :src="placeholderImageSrc" 
+      :alt="`Placeholder image for ${name}`"
+      class="meal-image placeholder-image"
+      loading="lazy"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
+import placeholderImage from '@/assets/meal-placeholder.jpg'
 
 interface Props {
   imageUrl?: string | null
@@ -30,22 +35,15 @@ interface Props {
   name: string
   rounded?: boolean
   hoverable?: boolean
-  placeholderColor?: string
-  fontSize?: number
+  useFallbackPlaceholder?: boolean
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  rounded: false,
-  hoverable: true,
-  placeholderColor: 'var(--color-primary-light)',
-  fontSize: 2
-})
+defineProps<Props>()
 
 const imageError = ref(false)
 
-const placeholderText = computed(() => {
-  return props.name.charAt(0).toUpperCase()
-})
+// Path to the placeholder image
+const placeholderImageSrc = placeholderImage
 
 function handleImageError() {
   imageError.value = true
@@ -58,7 +56,7 @@ function handleImageError() {
   height: 100%;
   overflow: hidden;
   position: relative;
-  background-color: var(--color-primary-light);
+  background-color: var(--color-background-soft);
 }
 
 .is-rounded {
@@ -73,28 +71,12 @@ function handleImageError() {
   display: block; /* Removes bottom spacing */
 }
 
+.placeholder-image {
+  object-fit: cover;
+  opacity: 0.9;
+}
+
 .is-hoverable.has-image:hover .meal-image {
   transform: scale(1.05);
-}
-
-.meal-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.placeholder-text {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background-color: var(--color-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  color: white;
-  text-transform: uppercase;
 }
 </style>
