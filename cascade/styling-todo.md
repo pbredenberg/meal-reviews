@@ -1,20 +1,20 @@
 # Meal Reviews - Styling Todo List
 
 ## General Layout Improvements
-- [ ] Make layout responsive for both mobile and desktop
-- [ ] Implement proper container widths and padding for different screen sizes
-- [ ] Add responsive breakpoints for different screen sizes
+- [x] Make layout responsive for both mobile and desktop
+- [x] Implement proper container widths and padding for different screen sizes
+- [x] Add responsive breakpoints for different screen sizes
 
 ## Color Scheme
-- [ ] Create a distinctive and attractive color scheme
-- [ ] Define primary, secondary, and accent colors
-- [ ] Implement consistent color usage across components
-- [ ] Support dark mode based on browser/system settings
+- [x] Create a distinctive and attractive color scheme
+- [x] Define primary, secondary, and accent colors
+- [x] Implement consistent color usage across components
+- [x] Support dark mode based on browser/system settings
 
 ## Header/Footer
-- [ ] Design and implement a global header with improved navigation
-- [ ] Create a footer with relevant links and information
-- [ ] Make header/footer responsive
+- [x] Design and implement a global header with improved navigation
+- [x] Create a footer with relevant links and information
+- [x] Make header/footer responsive
 
 ## Homepage Improvements
 - [ ] Redesign meal cards to show review counts
