@@ -25,6 +25,29 @@ const editedDescription = ref('')
 // New: store selected image file for editing
 const editedImageFile = ref<File | null>(null)
 const editedImagePreviewUrl = ref<string | null>(null)
+// Progress for editing image upload
+const editUploadProgress = ref<number>(0)
+// Drag-and-drop state for edit form
+const isEditDragOver = ref(false)
+const editFileInputRef = ref<HTMLInputElement | null>(null)
+
+function triggerEditFileInput() {
+  editFileInputRef.value?.click();
+}
+function onEditDragOver() {
+  isEditDragOver.value = true;
+}
+function onEditDragLeave() {
+  isEditDragOver.value = false;
+}
+function onEditDrop(event: DragEvent) {
+  isEditDragOver.value = false;
+  const files = event.dataTransfer?.files;
+  if (files && files.length > 0) {
+    handleEditImageChange({ target: { files } } as unknown as Event);
+  }
+}
+
 
 function removeEditPreviewImage() {
   editedImageFile.value = null;
@@ -193,12 +216,46 @@ async function saveMeal() {
       if (!userId) throw new Error('User must be logged in to upload images')
       const timestamp = Date.now()
       const filePath = `${userId}/${timestamp}-${editedImageFile.value.name}`
-      const { error: uploadError } = await supabase.storage
-        .from('meal-images')
-        .upload(filePath, editedImageFile.value, { upsert: true })
-      if (uploadError) throw uploadError
-      const { data } = supabase.storage.from('meal-images').getPublicUrl(filePath)
-      imageUrl = data?.publicUrl || null
+      // Direct upload to Supabase Storage using XMLHttpRequest
+      editUploadProgress.value = 0;
+      // Get the Supabase access token
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+      const accessToken = sessionData?.session?.access_token;
+      if (!accessToken) throw new Error('Could not get Supabase access token');
+
+      // Build upload URL
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+      if (!supabaseUrl) throw new Error('Missing Supabase URL');
+      const uploadUrl = `${supabaseUrl}/storage/v1/object/meal-images/${encodeURIComponent(filePath)}`;
+
+      // Do the upload
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', uploadUrl);
+      xhr.setRequestHeader('Authorization', `Bearer ${accessToken}`);
+      xhr.setRequestHeader('x-upsert', 'true'); // Overwrite if exists
+      xhr.upload.onprogress = (event: ProgressEvent) => {
+        if (event.lengthComputable) {
+          editUploadProgress.value = Math.round((event.loaded / event.total) * 100);
+        }
+      };
+      const uploadPromise: Promise<void> = new Promise((resolve, reject) => {
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve();
+          } else {
+            reject(new Error(`Upload failed: ${xhr.status} ${xhr.statusText} - ${xhr.responseText}`));
+          }
+        };
+        xhr.onerror = () => {
+          reject(new Error('Network error during image upload'));
+        };
+      });
+      xhr.send(editedImageFile.value);
+      await uploadPromise;
+      editUploadProgress.value = 100;
+      const { data } = supabase.storage.from('meal-images').getPublicUrl(filePath);
+      imageUrl = data?.publicUrl || null;
     }
 
     const result = await mealsStore.updateMeal(meal.value.id, {
@@ -287,19 +344,35 @@ onMounted(() => {
             ></textarea>
           </div>
 
-          <!-- New: Meal Image File Input (Edit) -->
           <div class="form-group">
             <label for="edit-image" class="form-label">Meal Image</label>
+            <div
+              class="drag-drop-area"
+              :class="{ 'drag-over': isEditDragOver }"
+              @click="triggerEditFileInput"
+              @dragover.prevent="onEditDragOver"
+              @dragleave.prevent="onEditDragLeave"
+              @drop.prevent="onEditDrop"
+              tabindex="0"
+              @keydown.enter.prevent="triggerEditFileInput"
+            >
+              <span v-if="!editedImagePreviewUrl">Drag & drop an image here, or click to select</span>
+              <div v-if="editedImagePreviewUrl" class="image-preview-wrapper">
+                <img :src="editedImagePreviewUrl" alt="Image preview" class="image-preview" />
+                <button type="button" class="remove-preview-btn" @click="removeEditPreviewImage" aria-label="Remove image preview">✕</button>
+              </div>
+            </div>
             <input
               id="edit-image"
+              ref="editFileInputRef"
               type="file"
               accept="image/jpeg,image/png,image/webp"
               @change="handleEditImageChange"
               :disabled="loading"
+              style="display: none;"
             />
-            <div v-if="editedImagePreviewUrl" class="image-preview-wrapper">
-              <img :src="editedImagePreviewUrl" alt="Image preview" class="image-preview" />
-              <button type="button" class="remove-preview-btn" @click="removeEditPreviewImage" aria-label="Remove image preview">✕</button>
+            <div v-if="editUploadProgress > 0 && loading" class="progress-bar-container">
+              <div class="progress-bar" :style="{ width: editUploadProgress + '%' }"></div>
             </div>
           </div>
 
@@ -386,6 +459,37 @@ onMounted(() => {
 
 <style src="../components/ImagePreview.css" scoped></style>
 <style scoped>
+.drag-drop-area {
+  border: 2px dashed #a3a3a3;
+  border-radius: 8px;
+  padding: 1.25rem;
+  text-align: center;
+  color: #64748b;
+  background: #f8fafc;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+  transition: border-color 0.2s, background 0.2s;
+  outline: none;
+}
+.drag-drop-area.drag-over,
+.drag-drop-area:focus {
+  border-color: #2563eb;
+  background: #e0e7ff;
+  color: #1e293b;
+}
+.progress-bar-container {
+  width: 100%;
+  background: #e5e7eb;
+  border-radius: 6px;
+  margin-top: 0.5rem;
+  height: 8px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  background: #2563eb;
+  transition: width 0.2s;
+}
 
 .meal-details {
   max-width: 1200px;
