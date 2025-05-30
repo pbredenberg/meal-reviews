@@ -195,6 +195,7 @@ onMounted(() => {
               required
               placeholder="Enter meal name"
               class="form-input"
+              autocomplete="off"
             >
           </div>
 
