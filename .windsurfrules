@@ -6,3 +6,4 @@
    - if we are making changes that only impact the CI/CD process, use the subject prefix "ci:"
    - make the subject line no more than 72 characters
    - put the rest of the detail in the commit message body, wrapping at 90 characters
+- when writing styling code try to use scoped component styling when possible, but feel free to create seperate global styles when it makes sense
