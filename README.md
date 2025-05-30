@@ -148,6 +148,19 @@ This application includes a fuzzy search feature for filtering meals by name or 
   - Links to `auth.users` via `created_by`
   - Stores meal name and description
 
+## CI/CD
+
+This project uses GitHub Actions for continuous integration and deployment.
+
+### Workflows
+
+- **CI**: Runs linting, type checking, and tests for all PRs and on the main branch
+- **Supabase Migrations**: Automatically applies database migrations when PRs are merged to main
+
+### Setting Up Supabase CI/CD
+
+For the Supabase migrations workflow to function, you need to configure specific secrets in your GitHub repository. See the [Supabase Secrets Setup Guide](docs/supabase-secrets-setup.md) for detailed instructions.
+
 ## Contributing
 
 1. Create a feature branch
