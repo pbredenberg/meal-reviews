@@ -48,9 +48,25 @@ A Vue 3 application for reviewing meals, built with Vite, TypeScript, and Supaba
    cp example.env .env
    ```
 
-   The local Supabase URL and anon key will be displayed after running `supabase-up`. Update `.env` with these values.
+   The local Supabase URL and anon key will be displayed after running `supabase-up`. Update `.env` with these values. Also add the service role key:
 
-5. **Generate TypeScript types**
+   ```env
+   VITE_SUPABASE_URL='http://127.0.0.1:54321'
+   VITE_SUPABASE_ANON_KEY=your_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+   ```
+
+5. **Create a test user**
+
+   ```sh
+   npm run create-test-user
+   ```
+
+   This will create a test user with the following credentials:
+   - Email: test@testperson.com
+   - Password: password123
+
+6. **Generate TypeScript types**
 
    ```bash
    npm run generate-types
