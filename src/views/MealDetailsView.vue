@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useMealsStore } from '@/stores/meals'
 import { useAuthStore } from '@/stores/auth'
+import { supabase } from '@/lib/supabase'
 import type { Meal } from '@/types/database'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import MealImage from '@/components/MealImage.vue'
@@ -20,6 +21,18 @@ const meal = ref<Meal | null>(null)
 const isEditing = ref(false)
 const editedName = ref('')
 const editedDescription = ref('')
+
+// New: store selected image file for editing
+const editedImageFile = ref<File | null>(null)
+
+function handleEditImageChange(event: Event) {
+  const target = event.target as HTMLInputElement;
+  if (target.files && target.files.length > 0) {
+    editedImageFile.value = target.files[0];
+  } else {
+    editedImageFile.value = null;
+  }
+}
 
 // Hardcoded reviews data for display purposes
 interface Review {
@@ -130,14 +143,43 @@ function cancelEditing() {
 async function saveMeal() {
   if (!editedName.value.trim() || !meal.value) return
 
-  const result = await mealsStore.updateMeal(meal.value.id, {
-    name: editedName.value.trim(),
-    description: editedDescription.value.trim() || null
-  })
+  loading.value = true
+  error.value = null
 
-  if (result.success && result.meal) {
-    meal.value = result.meal
-    isEditing.value = false
+  try {
+    let imageUrl: string | null | undefined = meal.value.image_url
+    // Upload image if selected
+    if (editedImageFile.value) {
+      let userId = user.value?.id
+      if (!userId) {
+        const { data: { user: supaUser } } = await supabase.auth.getUser()
+        userId = supaUser?.id
+      }
+      if (!userId) throw new Error('User must be logged in to upload images')
+      const timestamp = Date.now()
+      const filePath = `${userId}/${timestamp}-${editedImageFile.value.name}`
+      const { error: uploadError } = await supabase.storage
+        .from('meal-images')
+        .upload(filePath, editedImageFile.value, { upsert: true })
+      if (uploadError) throw uploadError
+      const { data } = supabase.storage.from('meal-images').getPublicUrl(filePath)
+      imageUrl = data?.publicUrl || null
+    }
+
+    const result = await mealsStore.updateMeal(meal.value.id, {
+      name: editedName.value.trim(),
+      description: editedDescription.value.trim() || null,
+      image_url: imageUrl
+    })
+
+    if (result.success && result.meal) {
+      meal.value = result.meal
+      isEditing.value = false
+    }
+  } catch (e) {
+    error.value = (e as Error).message
+  } finally {
+    loading.value = false
   }
 }
 
@@ -208,6 +250,18 @@ onMounted(() => {
               rows="4"
               class="form-input"
             ></textarea>
+          </div>
+
+          <!-- New: Meal Image File Input (Edit) -->
+          <div class="form-group">
+            <label for="edit-image" class="form-label">Meal Image</label>
+            <input
+              id="edit-image"
+              type="file"
+              accept="image/*"
+              @change="handleEditImageChange"
+              :disabled="loading"
+            />
           </div>
 
           <div class="form-actions">
