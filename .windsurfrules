@@ -1,2 +1,8 @@
 - be careful to use correct HTML and avoid accidentally using HTML entities, primarily &lt; instead of <. This should be avoided.
 - when writing TypeScript, don't use `any` as a type. define the type
+- when formatting commit messages:
+   - if we are adding part of a new feature, use the subject prefix "sub(feat):"
+   - if we are making changes that only impact the build system or external dependencies, use the subject prefix "chore:"
+   - if we are making changes that only impact the CI/CD process, use the subject prefix "ci:"
+   - make the subject line no more than 72 characters
+   - put the rest of the detail in the commit message body, wrapping at 90 characters
