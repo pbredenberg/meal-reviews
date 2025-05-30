@@ -10,8 +10,9 @@ authStore.initialize()
 
 <template>
   <div class="app-wrapper">
+    <a href="#main-content" class="skip-to-content">Skip to content</a>
     <NavBar />
-    <main>
+    <main id="main-content" tabindex="-1">
       <div class="container">
         <RouterView />
       </div>

@@ -1,7 +1,8 @@
 <template>
   <div
     class="spinner"
-    :style="{ width: `${size}rem`, height: `${size}rem` }"
+    :class="[`spinner-${color}`, { 'spinner-centered': centered }]"
+    :style="{ width: `${size}rem`, height: `${size}rem`, borderWidth: `${borderWidth}px` }"
     role="status"
     :aria-label="label"
   >
@@ -9,13 +10,63 @@
   </div>
 </template>
 
+<script setup lang="ts">
+interface Props {
+  size?: 4 | 5 | 6 | 8 | 10 | 12
+  color?: 'primary' | 'secondary' | 'accent' | 'light' | 'dark'
+  label?: string
+  centered?: boolean
+  borderWidth?: number
+}
+
+withDefaults(defineProps<Props>(), {
+  size: 5,
+  color: 'primary',
+  label: 'Loading...',
+  centered: false,
+  borderWidth: 2
+})
+</script>
+
 <style scoped>
 .spinner {
   display: inline-block;
-  border: 2px solid currentColor;
+  border-style: solid;
   border-right-color: transparent;
   border-radius: 50%;
   animation: spin 0.75s linear infinite;
+}
+
+.spinner-centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.spinner-primary {
+  border-color: var(--color-primary);
+  border-right-color: transparent;
+}
+
+.spinner-secondary {
+  border-color: var(--color-secondary);
+  border-right-color: transparent;
+}
+
+.spinner-accent {
+  border-color: var(--color-accent);
+  border-right-color: transparent;
+}
+
+.spinner-light {
+  border-color: var(--color-text-light);
+  border-right-color: transparent;
+}
+
+.spinner-dark {
+  border-color: var(--color-text);
+  border-right-color: transparent;
 }
 
 .visually-hidden {
@@ -36,17 +87,3 @@
   }
 }
 </style>
-
-<script setup lang="ts">
-interface Props {
-  size?: 4 | 5 | 6 | 8 | 10 | 12
-  className?: string
-  label?: string
-}
-
-withDefaults(defineProps<Props>(), {
-  size: 5,
-  className: 'text-blue-600',
-  label: 'Loading...'
-})
-</script>
