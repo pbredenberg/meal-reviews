@@ -5,7 +5,7 @@ declare module 'fuse.js' {
   }
   
   namespace Fuse {
-    interface IFuseOptions<T> {
+    interface IFuseOptions {
       keys?: Array<string | { name: string; weight: number }>;
       id?: string;
       threshold?: number;
