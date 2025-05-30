@@ -10,9 +10,13 @@
    - [x] Update TypeScript types to include the meal image URL. *(done)*
 
 4. **Frontend: Meal Creation**
-   - [ ] Add a file input to the meal creation form for image upload.
-   - [ ] On form submission, upload the image to Supabase Storage and get its URL.
-   - [ ] Save the image URL with the new meal record.
+   - [x] Add a file input to the meal creation form for image upload.
+   - [x] On form submission, upload the image to Supabase Storage and get its URL.
+   - [x] Save the image URL with the new meal record.
 
 5. **Frontend: Home Page**
-   - [ ] Display the meal image alongside meal details on the home page.
+   - [x] Display the meal image alongside meal details on the home page.
+
+---
+
+All tasks complete! See issue #5.

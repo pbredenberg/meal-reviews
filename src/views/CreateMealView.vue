@@ -2,15 +2,30 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMealsStore } from '@/stores/meals'
+import { useAuthStore } from '@/stores/auth'
+import { supabase } from '@/lib/supabase'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 
 const router = useRouter()
 const mealsStore = useMealsStore()
+const authStore = useAuthStore()
 
 const name = ref('')
 const description = ref('')
 const error = ref<string | null>(null)
 const loading = ref(false)
+
+// New: store selected image file
+const imageFile = ref<File | null>(null)
+
+function handleImageChange(event: Event) {
+  const target = event.target as HTMLInputElement;
+  if (target.files && target.files.length > 0) {
+    imageFile.value = target.files[0];
+  } else {
+    imageFile.value = null;
+  }
+}
 
 async function handleSubmit() {
   if (!name.value.trim()) {
@@ -22,9 +37,33 @@ async function handleSubmit() {
   error.value = null
 
   try {
+    let imageUrl: string | null = null
+
+    // Upload image if selected
+    if (imageFile.value) {
+      // Get user id for unique path
+      let userId = authStore.user?.id
+      if (!userId) {
+        // Try to get user from supabase directly if not in store
+        const { data: { user } } = await supabase.auth.getUser()
+        userId = user?.id
+      }
+      if (!userId) throw new Error('User must be logged in to upload images')
+      const timestamp = Date.now()
+      const filePath = `${userId}/${timestamp}-${imageFile.value.name}`
+      const { error: uploadError } = await supabase.storage
+        .from('meal-images')
+        .upload(filePath, imageFile.value)
+      if (uploadError) throw uploadError
+      // Get public URL
+      const { data } = supabase.storage.from('meal-images').getPublicUrl(filePath)
+      imageUrl = data?.publicUrl || null
+    }
+
     const result = await mealsStore.createMeal({
       name: name.value.trim(),
-      description: description.value.trim() || null
+      description: description.value.trim() || null,
+      image_url: imageUrl
     })
 
     if (!result.success) {
@@ -70,6 +109,18 @@ async function handleSubmit() {
 
       <div v-if="error" class="error">
         {{ error }}
+      </div>
+
+      <!-- New: Meal Image File Input -->
+      <div class="form-group">
+        <label for="image">Meal Image</label>
+        <input
+          id="image"
+          type="file"
+          accept="image/*"
+          @change="handleImageChange"
+          :disabled="loading"
+        />
       </div>
 
       <button type="submit" :disabled="loading">
