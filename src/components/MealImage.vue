@@ -1,14 +1,22 @@
 <template>
-  <div class="meal-image-container" :class="{ 'has-image': imageUrl }">
+  <div 
+    class="meal-image-container" 
+    :class="{ 
+      'has-image': imageUrl && !imageError, 
+      'is-rounded': rounded,
+      'is-hoverable': hoverable
+    }"
+  >
     <img 
       v-if="imageUrl && !imageError" 
       :src="imageUrl" 
-      :alt="altText"
+      :alt="altText || `Image of ${name}`"
       @error="handleImageError"
       class="meal-image"
+      loading="lazy"
     />
-    <div v-else class="meal-placeholder">
-      <span>{{ placeholderText }}</span>
+    <div v-else class="meal-placeholder" :style="{ backgroundColor: placeholderColor }">
+      <span class="placeholder-text" :style="{ fontSize: `${fontSize}rem` }">{{ placeholderText }}</span>
     </div>
   </div>
 </template>
@@ -20,9 +28,19 @@ interface Props {
   imageUrl?: string | null
   altText?: string
   name: string
+  rounded?: boolean
+  hoverable?: boolean
+  placeholderColor?: string
+  fontSize?: number
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  rounded: false,
+  hoverable: true,
+  placeholderColor: 'var(--color-primary-light)',
+  fontSize: 2
+})
+
 const imageError = ref(false)
 
 const placeholderText = computed(() => {
@@ -43,14 +61,19 @@ function handleImageError() {
   background-color: var(--color-primary-light);
 }
 
+.is-rounded {
+  border-radius: 8px;
+}
+
 .meal-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
+  display: block; /* Removes bottom spacing */
 }
 
-.has-image:hover .meal-image {
+.is-hoverable.has-image:hover .meal-image {
   transform: scale(1.05);
 }
 
@@ -60,10 +83,9 @@ function handleImageError() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-primary-light);
 }
 
-.meal-placeholder span {
+.placeholder-text {
   width: 80px;
   height: 80px;
   border-radius: 50%;
@@ -71,7 +93,6 @@ function handleImageError() {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
   font-weight: 700;
   color: white;
   text-transform: uppercase;

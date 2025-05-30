@@ -1,9 +1,9 @@
 <template>
-  <nav class="navbar">
+  <nav class="navbar" aria-label="Main navigation">
     <div class="container">
       <div class="nav-content">
         <div class="nav-brand">
-          <router-link to="/">
+          <router-link to="/" aria-label="Meal Reviews Home">
             <span>Meal Reviews</span>
           </router-link>
         </div>
@@ -11,41 +11,50 @@
         <!-- Mobile menu button -->
         <button 
           class="mobile-menu-button" 
-          @click="mobileMenuOpen = !mobileMenuOpen"
-          aria-label="Toggle menu"
+          @click="toggleMobileMenu"
+          :aria-expanded="mobileMenuOpen ? 'true' : 'false'"
+          aria-controls="nav-menu"
+          aria-label="Toggle navigation menu"
         >
           <span class="bar"></span>
           <span class="bar"></span>
           <span class="bar"></span>
         </button>
 
-        <div class="nav-items" :class="{ 'mobile-open': mobileMenuOpen }">
-          <div v-if="isLoading" class="loading">
-            <LoadingSpinner :size="4" />
+        <div 
+          id="nav-menu"
+          class="nav-items" 
+          :class="{ 'mobile-open': mobileMenuOpen }"
+          role="menubar"
+        >
+          <div v-if="isLoading" class="loading" aria-live="polite">
+            <LoadingSpinner :size="4" label="Loading authentication status" />
           </div>
           
-          <router-link to="/" class="nav-link" @click="closeMobileMenu">
+          <router-link to="/" class="nav-link" @click="closeMobileMenu" role="menuitem">
             Home
           </router-link>
           
           <template v-if="isAuthenticated">
-            <router-link to="/profile" class="nav-link" @click="closeMobileMenu">
+            <router-link to="/profile" class="nav-link" @click="closeMobileMenu" role="menuitem">
               Profile
             </router-link>
             <button
               @click="handleLogout"
               class="nav-link"
               :disabled="isLoading"
+              role="menuitem"
+              aria-label="Log out of your account"
             >
               Log out
             </button>
           </template>
           
           <template v-else>
-            <router-link to="/login" class="nav-link" @click="closeMobileMenu">
+            <router-link to="/login" class="nav-link" @click="closeMobileMenu" role="menuitem">
               Log in
             </router-link>
-            <router-link to="/signup" class="nav-link signup" @click="closeMobileMenu">
+            <router-link to="/signup" class="nav-link signup" @click="closeMobileMenu" role="menuitem">
               Sign up
             </router-link>
           </template>
@@ -205,9 +214,31 @@ const { isAuthenticated, loading: isLoading } = storeToRefs(authStore)
 // Mobile menu state
 const mobileMenuOpen = ref(false)
 
+// Toggle mobile menu
+function toggleMobileMenu() {
+  mobileMenuOpen.value = !mobileMenuOpen.value
+  
+  // When opening the menu, trap focus within it for accessibility
+  if (mobileMenuOpen.value) {
+    // Add event listener for ESC key to close menu
+    document.addEventListener('keydown', handleEscKey)
+  } else {
+    // Remove event listener when menu is closed
+    document.removeEventListener('keydown', handleEscKey)
+  }
+}
+
 // Close mobile menu
 function closeMobileMenu() {
   mobileMenuOpen.value = false
+  document.removeEventListener('keydown', handleEscKey)
+}
+
+// Handle ESC key press to close menu
+function handleEscKey(event: KeyboardEvent) {
+  if (event.key === 'Escape') {
+    closeMobileMenu()
+  }
 }
 
 async function handleLogout() {
