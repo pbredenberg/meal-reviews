@@ -59,12 +59,15 @@ A Vue 3 application for reviewing meals, built with Vite, TypeScript, and Supaba
 5. **Create a test user**
 
    ```sh
-   npm run create-test-user
+   npm run init
    ```
 
    This will create a test user with the following credentials:
-   - Email: test@testperson.com
+
+   - Email: <test@testperson.com>
    - Password: password123
+
+   It will also inject test meals for the user.
 
 6. **Generate TypeScript types**
 
@@ -74,7 +77,7 @@ A Vue 3 application for reviewing meals, built with Vite, TypeScript, and Supaba
 
    This will generate TypeScript types from your Supabase schema.
 
-6. **Start the development server**
+7. **Start the development server**
 
    ```bash
    npm run dev

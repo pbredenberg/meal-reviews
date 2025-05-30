@@ -15,7 +15,7 @@
     "generate-types": "supabase gen types typescript --local > src/types/supabase.ts",
     "supabase-up": "supabase start",
     "supabase-reset": "supabase db reset",
-    "create-test-user": "tsx scripts/create-test-user.ts"
+    "init-test-date": "tsx scripts/init.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.49.8",
