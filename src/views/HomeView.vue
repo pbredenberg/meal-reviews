@@ -54,10 +54,15 @@ router.afterEach((to) => {
     </div>
 
     <div v-else class="meals-list">
-      <article v-for="meal in sortedMeals" :key="meal.id" class="meal-card">
+      <RouterLink
+        v-for="meal in sortedMeals"
+        :key="meal.id"
+        :to="`/meals/${meal.id}`"
+        class="meal-card"
+      >
         <h2>{{ meal.name }}</h2>
-        <p v-if="meal.description">{{ meal.description }}</p>
-      </article>
+        <p v-if="meal.description" class="description">{{ meal.description }}</p>
+      </RouterLink>
     </div>
   </main>
 </template>
@@ -125,10 +130,20 @@ router.afterEach((to) => {
 }
 
 .meal-card {
+  display: block;
   padding: 1rem;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s;
+}
+
+.meal-card:hover {
+  border-color: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .meal-card h2 {

@@ -33,6 +33,11 @@ const router = createRouter({
       name: 'create-meal',
       component: () => import('../views/CreateMealView.vue'),
       meta: { requiresAuth: true }
+    },
+    {
+      path: '/meals/:id',
+      name: 'meal-details',
+      component: () => import('../views/MealDetailsView.vue')
     }
   ],
 })
