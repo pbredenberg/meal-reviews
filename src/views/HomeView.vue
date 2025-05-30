@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useMealsStore } from '@/stores/meals'
 import { useAuthStore } from '@/stores/auth'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
+import Fuse from 'fuse.js'
+import type { IFuseOptions } from 'fuse.js'
+import type { Meal } from '@/types/database'
 
 const router = useRouter()
 const mealsStore = useMealsStore()
@@ -12,6 +15,27 @@ const authStore = useAuthStore()
 
 const { meals, loading, error, sortedMeals } = storeToRefs(mealsStore)
 const { isAuthenticated } = storeToRefs(authStore)
+
+// Search query state
+const searchQuery = ref<string>('')
+
+// Fuzzy search options
+const fuseOptions: IFuseOptions<Meal> = {
+  keys: ['name', 'description'],
+  threshold: 0.4,
+  ignoreLocation: true,
+}
+
+// Computed: filtered meals using Fuse.js or all meals if query is empty
+type FilteredMealList = Meal[]
+const filteredMeals = computed<FilteredMealList>(() => {
+  if (searchQuery.value.trim() !== '') {
+    const fuse = new Fuse(meals.value, fuseOptions)
+    const results = fuse.search(searchQuery.value.trim())
+    return results.map(result => result.item)
+  }
+  return sortedMeals.value
+})
 
 async function loadMeals() {
   const result = await mealsStore.fetchMeals()
@@ -41,6 +65,16 @@ router.afterEach((to) => {
       </RouterLink>
     </div>
 
+    <div class="search-bar-container">
+      <input
+        v-model="searchQuery"
+        class="search-bar"
+        type="text"
+        placeholder="Search meals..."
+        aria-label="Search meals"
+      />
+    </div>
+
     <div v-if="loading" class="loading-container">
       <LoadingSpinner :size="6" />
     </div>
@@ -55,7 +89,7 @@ router.afterEach((to) => {
 
     <div v-else class="meals-list">
       <RouterLink
-        v-for="meal in sortedMeals"
+        v-for="meal in filteredMeals"
         :key="meal.id"
         :to="`/meals/${meal.id}`"
         class="meal-card"
@@ -84,6 +118,30 @@ router.afterEach((to) => {
   margin: 0;
   font-weight: bold;
 }
+
+.search-bar-container {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.search-bar {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  transition: border 0.2s;
+}
+
+.search-bar:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
 
 .add-meal-button {
   display: inline-flex;

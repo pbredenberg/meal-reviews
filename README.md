@@ -8,6 +8,28 @@ A Vue 3 application for reviewing meals, built with Vite, TypeScript, and Supaba
 - Meal management (create, read, update, delete)
 - TypeScript support
 - Responsive design
+- Fuzzy search for meals (Fuse.js, declarative, typo-tolerant)
+
+---
+
+## Fuzzy Search Feature
+
+This application includes a fuzzy search feature for filtering meals by name or description, implemented with [Fuse.js](https://fusejs.io/). The search is:
+
+- **Declarative:** Uses a computed property for filtering, avoiding nested if statements.
+- **Type-safe:** All types are explicitly defined in TypeScript.
+- **Compositional:** The logic is modular and easy to extend.
+
+### Usage
+- Use the search bar at the top of the meal list to filter meals by name or description.
+- The search is typo-tolerant and updates results in real time as you type.
+
+### Configuration
+- Search keys: `name`, `description`
+- Fuzzy threshold: `0.4` (can be tuned in `HomeView.vue`)
+- Library: [Fuse.js](https://fusejs.io/)
+
+---
 
 ## Prerequisites
 
