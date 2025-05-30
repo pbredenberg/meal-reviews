@@ -8,14 +8,12 @@ This checklist covers the remaining enhancements from issue #5 for meal image up
     - [x] c. Add instant preview for selected image in create/edit forms.
     - [x] d. Validate file type and size before upload; show error if invalid.
 
-- [ ] **2. Drag & Drop Uploader with Progress Bar**
-    - [ ] a. Choose style/UX for drag-and-drop area (modern default style selected).
-    - [ ] b. Implement drag-and-drop file selection in create/edit forms.
-    - [ ] c. Show upload progress bar during image upload (creation and edit flows).
-    - [ ] d. Ensure fallback to regular file input for accessibility.
+- [x] **2. Drag & Drop Uploader with Progress Bar**
+    - [x] a. Choose style/UX for drag-and-drop area (modern default style selected).
+    - [x] b. Implement drag-and-drop file selection in create/edit forms.
+    - [x] c. Show upload progress bar during image upload (creation and edit flows).
+    - [x] d. Ensure fallback to regular file input for accessibility.
 
 - [ ] **3. Testing & UX Polish**
-    - [ ] a. Test on desktop and mobile browsers. _(Prompt user for devices to prioritize)_
-    - [ ] b. Confirm error messages are clear and helpful.
-    - [ ] c. Review accessibility (keyboard, screen reader, focus states).
-
+    - [ ] a. Conduct thorough testing on both desktop and mobile browsers to ensure all features work as intended and that error messages are clear and helpful.
+    - [ ] b. Review accessibility (keyboard, screen reader, focus states).
