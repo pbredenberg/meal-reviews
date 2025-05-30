@@ -6,7 +6,6 @@ import { useMealsStore } from '@/stores/meals'
 import { useAuthStore } from '@/stores/auth'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import Fuse from 'fuse.js'
-import type { IFuseOptions } from 'fuse.js'
 import type { Meal } from '@/types/database'
 
 const router = useRouter()
@@ -20,7 +19,7 @@ const { isAuthenticated } = storeToRefs(authStore)
 const searchQuery = ref<string>('')
 
 // Fuzzy search options
-const fuseOptions: IFuseOptions<Meal> = {
+const fuseOptions = {
   keys: ['name', 'description'],
   threshold: 0.4,
   ignoreLocation: true,
@@ -32,11 +31,28 @@ const filteredMeals = computed<FilteredMealList>(() => {
   if (searchQuery.value.trim() !== '') {
     const fuse = new Fuse(meals.value, fuseOptions)
     const results = fuse.search(searchQuery.value.trim())
-    return results.map(result => result.item)
+    return results.map((result: { item: Meal }) => result.item)
   }
   return sortedMeals.value
 })
 
+// Format date to a more readable format
+function formatDate(dateString: string): string {
+  const date = new Date(dateString)
+  return new Intl.DateTimeFormat('en-US', { 
+    month: 'short', 
+    day: 'numeric', 
+    year: 'numeric' 
+  }).format(date)
+}
+
+// Determine if a meal is popular (for now, just the first 3 meals)
+function isPopular(meal: Meal): boolean {
+  // In a real app, this would be based on review count or rating
+  // For now, just mark the first 3 meals as popular
+  const index = meals.value.findIndex(m => m.id === meal.id)
+  return index < 3
+}
 async function loadMeals() {
   const result = await mealsStore.fetchMeals()
   if (!result.success) {
@@ -57,11 +73,11 @@ router.afterEach((to) => {
 </script>
 
 <template>
-  <main class="meals-container">
-    <div class="meals-header">
-      <h1>Meal Reviews</h1>
-      <RouterLink v-if="isAuthenticated" to="/meals/new" class="add-meal-button">
-        Add New Meal
+  <main>
+    <div class="page-header">
+      <h1>Discover Meals</h1>
+      <RouterLink v-if="isAuthenticated" to="/meals/new" class="btn btn-primary">
+        <span>Add New Meal</span>
       </RouterLink>
     </div>
 
@@ -85,37 +101,51 @@ router.afterEach((to) => {
 
     <div v-else-if="meals.length === 0" class="empty-state">
       <p>No meals have been added yet.</p>
+      <RouterLink v-if="isAuthenticated" to="/meals/new" class="btn btn-primary mt-4">
+        Add Your First Meal
+      </RouterLink>
     </div>
 
-    <div v-else class="meals-list">
+    <div v-else class="grid">
       <RouterLink
         v-for="meal in filteredMeals"
         :key="meal.id"
         :to="`/meals/${meal.id}`"
-        class="meal-card"
+        class="card meal-card"
       >
-        <h2>{{ meal.name }}</h2>
-        <p v-if="meal.description" class="description">{{ meal.description }}</p>
+        <div class="meal-card-image">
+          <div class="meal-placeholder-image">
+            <span>{{ meal.name.charAt(0) }}</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <h2 class="meal-title">{{ meal.name }}</h2>
+          <p v-if="meal.description" class="meal-description">{{ meal.description }}</p>
+          <div class="meal-meta">
+            <span class="meal-date">{{ formatDate(meal.created_at) }}</span>
+            <span class="meal-badge" v-if="isPopular(meal)">
+              Popular
+            </span>
+          </div>
+        </div>
       </RouterLink>
     </div>
   </main>
 </template>
 
 <style scoped>
-.meals-container {
-  padding: 2rem 1rem;
-}
-
-.meals-header {
-  margin-bottom: 2rem;
+.page-header {
+  margin-bottom: var(--space-6);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
 }
 
-.meals-header h1 {
-  font-size: 2rem;
+.page-header h1 {
   margin: 0;
+  color: var(--color-heading);
   font-weight: bold;
 }
 
@@ -142,76 +172,113 @@ router.afterEach((to) => {
   border-color: #2563eb;
 }
 
-
-.add-meal-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.75rem 1.5rem;
-  border: 1px solid #2563eb;
-  color: white;
-  border-radius: 4px;
-  text-decoration: none;
-  font-weight: 600;
-  transition: background-color 0.2s;
-}
-
-.add-meal-button:hover {
-  background-color: #1d4ed8;
-}
-
 .loading-container {
   display: flex;
   justify-content: center;
-  padding: 2rem;
+  padding: var(--space-8);
 }
 
 .error-alert {
-  background-color: #fee2e2;
-  border: 1px solid #dc2626;
-  border-radius: 4px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  color: #dc2626;
+  background-color: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.5);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  color: rgb(220, 38, 38);
 }
 
 .empty-state {
   text-align: center;
-  padding: 2rem;
-  color: #666;
+  padding: var(--space-8);
+  color: var(--color-text-light);
+  background-color: var(--color-background-soft);
+  border-radius: var(--radius-lg);
 }
 
-.meals-list {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-}
-
+/* Meal Card Styling */
 .meal-card {
-  display: block;
-  padding: 1rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   text-decoration: none;
-  color: inherit;
-  transition: all 0.2s;
+  color: var(--color-text);
+  overflow: hidden;
 }
 
-.meal-card:hover {
-  border-color: #2563eb;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.meal-card-image {
+  height: 160px;
+  overflow: hidden;
+  background-color: var(--color-primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.meal-card h2 {
+.meal-placeholder-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.meal-placeholder-image span {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+}
+
+.meal-title {
   font-size: 1.25rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-2);
+  color: var(--color-heading);
 }
 
-.meal-card p {
-  color: #666;
+.meal-description {
+  color: var(--color-text);
   line-height: 1.5;
+  margin-bottom: var(--space-3);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.meal-meta {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.875rem;
+}
+
+.meal-date {
+  color: var(--color-text-light);
+}
+
+.meal-badge {
+  background-color: var(--color-accent-light);
+  color: var(--color-accent);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-full);
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .meal-card-image {
+    height: 120px;
+  }
 }
 </style>
