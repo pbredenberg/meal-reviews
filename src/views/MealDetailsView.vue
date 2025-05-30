@@ -24,15 +24,50 @@ const editedDescription = ref('')
 
 // New: store selected image file for editing
 const editedImageFile = ref<File | null>(null)
+const editedImagePreviewUrl = ref<string | null>(null)
+
+function removeEditPreviewImage() {
+  editedImageFile.value = null;
+  editedImagePreviewUrl.value = null;
+  const fileInput = document.getElementById('edit-image') as HTMLInputElement | null;
+  if (fileInput) fileInput.value = '';
+}
 
 function handleEditImageChange(event: Event) {
   const target = event.target as HTMLInputElement;
-  if (target.files && target.files.length > 0) {
-    editedImageFile.value = target.files[0];
+  const file = target.files && target.files.length > 0 ? target.files[0] : null;
+
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+  const maxSize = 2 * 1024 * 1024; // 2MB
+
+  if (file) {
+    if (!allowedTypes.includes(file.type)) {
+      error.value = 'Invalid file type. Only JPEG, PNG, and WEBP are allowed.';
+      editedImageFile.value = null;
+      editedImagePreviewUrl.value = null;
+      target.value = '';
+      return;
+    }
+    if (file.size > maxSize) {
+      error.value = 'Image is too large. Maximum size is 2MB.';
+      editedImageFile.value = null;
+      editedImagePreviewUrl.value = null;
+      target.value = '';
+      return;
+    }
+    editedImageFile.value = file;
+    error.value = null;
+    const reader = new FileReader();
+    reader.onload = e => {
+      editedImagePreviewUrl.value = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
   } else {
     editedImageFile.value = null;
+    editedImagePreviewUrl.value = null;
   }
 }
+
 
 // Hardcoded reviews data for display purposes
 interface Review {
@@ -258,10 +293,14 @@ onMounted(() => {
             <input
               id="edit-image"
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp"
               @change="handleEditImageChange"
               :disabled="loading"
             />
+            <div v-if="editedImagePreviewUrl" class="image-preview-wrapper">
+              <img :src="editedImagePreviewUrl" alt="Image preview" class="image-preview" />
+              <button type="button" class="remove-preview-btn" @click="removeEditPreviewImage" aria-label="Remove image preview">✕</button>
+            </div>
           </div>
 
           <div class="form-actions">
@@ -345,7 +384,9 @@ onMounted(() => {
   </div>
 </template>
 
+<style src="../components/ImagePreview.css" scoped></style>
 <style scoped>
+
 .meal-details {
   max-width: 1200px;
   margin: 0 auto;
