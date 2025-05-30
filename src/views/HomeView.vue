@@ -6,7 +6,7 @@ import { useMealsStore } from '@/stores/meals'
 import { useAuthStore } from '@/stores/auth'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import Fuse from 'fuse.js'
-import MealImage from '@/components/MealImage.vue'
+import MealCard from '@/components/MealCard.vue'
 import type { Meal } from '@/types/database'
 
 const router = useRouter()
@@ -32,28 +32,21 @@ const filteredMeals = computed<FilteredMealList>(() => {
   if (searchQuery.value.trim() !== '') {
     const fuse = new Fuse(meals.value, fuseOptions)
     const results = fuse.search(searchQuery.value.trim())
-    return results.map((result: { item: Meal }) => result.item)
+    return results.map((result) => result.item as Meal)
   }
   return sortedMeals.value
 })
 
-// Format date to a more readable format
-function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  }).format(date)
+
+
+// Helper function to get estimated rating based on meal data
+function getEstimatedRating(meal: Meal): number {
+  // In a real app, this would calculate from actual reviews
+  // For now, use a simple algorithm based on the meal ID
+  const idSum = meal.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0)
+  return Math.max(1, Math.min(5, Math.floor(idSum % 5) + 1))
 }
 
-// Determine if a meal is popular (for now, just the first 3 meals)
-function isPopular(meal: Meal): boolean {
-  // In a real app, this would be based on review count or rating
-  // For now, just mark the first 3 meals as popular
-  const index = meals.value.findIndex(m => m.id === meal.id)
-  return index < 3
-}
 async function loadMeals() {
   const result = await mealsStore.fetchMeals()
   if (!result.success) {
@@ -75,190 +68,152 @@ router.afterEach((to) => {
 
 <template>
   <main>
-    <div class="page-header">
-      <h1>Discover Meals</h1>
-      <RouterLink v-if="isAuthenticated" to="/meals/new" class="btn btn-primary">
-        <span>Add New Meal</span>
-      </RouterLink>
-    </div>
+    <section class="section">
+      <h1 class="section-title slide-in">Discover Meals</h1>
 
-    <div class="search-bar-container">
-      <input
-        v-model="searchQuery"
-        class="search-bar"
-        type="text"
-        placeholder="Search meals..."
-        aria-label="Search meals"
-      />
-    </div>
-
-    <div v-if="loading" class="loading-container">
-      <LoadingSpinner :size="6" />
-    </div>
-
-    <div v-else-if="error" class="error-alert">
-      {{ error }}
-    </div>
-
-    <div v-else-if="meals.length === 0" class="empty-state">
-      <p>No meals have been added yet.</p>
-      <RouterLink v-if="isAuthenticated" to="/meals/new" class="btn btn-primary mt-4">
-        Add Your First Meal
-      </RouterLink>
-    </div>
-
-    <div v-else class="grid">
-      <RouterLink
-        v-for="meal in filteredMeals"
-        :key="meal.id"
-        :to="`/meals/${meal.id}`"
-        class="card meal-card"
-      >
-        <div class="meal-card-image">
-          <MealImage :name="meal.name" :image-url="meal.image_url" :alt-text="meal.name" />
+      <div class="header-actions">
+        <div class="search-container" v-if="!loading && meals.length > 0">
+          <input
+            v-model="searchQuery"
+            type="text"
+            class="form-input search-input"
+            placeholder="Search meals..."
+            aria-label="Search meals"
+          />
         </div>
-        <div class="card-body">
-          <h2 class="meal-title">{{ meal.name }}</h2>
-          <p v-if="meal.description" class="meal-description">{{ meal.description }}</p>
-          <div class="meal-meta">
-            <span class="meal-date">{{ formatDate(meal.created_at) }}</span>
-            <span class="meal-badge" v-if="isPopular(meal)">
-              Popular
-            </span>
-          </div>
-        </div>
-      </RouterLink>
-    </div>
+
+        <RouterLink v-if="isAuthenticated" to="/meals/new" class="btn btn-primary glow">
+          <span>Add New Meal</span>
+        </RouterLink>
+      </div>
+
+      <div v-if="loading" class="loading-container">
+        <LoadingSpinner :size="6" label="Loading meals" />
+      </div>
+
+      <div v-else-if="error" class="error-alert">
+        <p>{{ error }}</p>
+        <button @click="loadMeals" class="btn btn-secondary btn-sm mt-4">Try Again</button>
+      </div>
+
+      <div v-else-if="meals.length === 0" class="empty-state">
+        <p>No meals have been added yet.</p>
+        <RouterLink v-if="isAuthenticated" to="/meals/new" class="btn btn-primary mt-4">
+          Add Your First Meal
+        </RouterLink>
+      </div>
+
+      <div v-else class="grid">
+        <MealCard
+          v-for="meal in filteredMeals"
+          :key="meal.id"
+          class="stagger-item slide-up"
+          :meal="{
+            id: meal.id,
+            name: meal.name,
+            description: meal.description ?? 'No description available',
+            rating: getEstimatedRating(meal),
+            imageUrl: meal.image_url ?? undefined
+          }"
+        />
+      </div>
+    </section>
   </main>
 </template>
 
 <style scoped>
-.page-header {
-  margin-bottom: var(--space-6);
+.header-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: var(--space-4);
+  margin-bottom: var(--space-8);
+  position: relative;
 }
 
-.page-header h1 {
-  margin: 0;
-  color: var(--color-heading);
-  font-weight: bold;
-}
-
-.search-bar-container {
-  margin-bottom: 2rem;
-  display: flex;
-  justify-content: center;
-}
-
-.search-bar {
-  width: 100%;
+.search-container {
+  flex: 1;
   max-width: 400px;
-  padding: 0.75rem 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 1rem;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-  transition: border 0.2s;
+  position: relative;
 }
 
-.search-bar:focus {
-  outline: none;
-  border-color: #2563eb;
+.search-input {
+  padding-left: 2.5rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23a78bfa'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 0.75rem center;
+  background-size: 1.25rem;
 }
 
 .loading-container {
   display: flex;
   justify-content: center;
-  padding: var(--space-8);
+  padding: var(--space-12);
 }
 
 .error-alert {
-  background-color: rgba(220, 38, 38, 0.1);
-  border: 1px solid rgba(220, 38, 38, 0.5);
+  background: linear-gradient(to right, rgba(236, 72, 153, 0.05), rgba(236, 72, 153, 0.1));
+  border-left: 4px solid var(--color-accent);
   border-radius: var(--radius-md);
-  padding: var(--space-4);
-  margin-bottom: var(--space-4);
-  color: rgb(220, 38, 38);
+  padding: var(--space-6);
+  margin-bottom: var(--space-8);
+  color: var(--color-accent);
+  text-align: center;
+  box-shadow: var(--shadow-md);
 }
 
 .empty-state {
   text-align: center;
-  padding: var(--space-8);
+  padding: var(--space-12) var(--space-8);
   color: var(--color-text-light);
-  background-color: var(--color-background-soft);
+  background: linear-gradient(to bottom, var(--color-background-soft), var(--color-background));
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-inner);
+  position: relative;
+  overflow: hidden;
 }
 
-/* Meal Card Styling */
-.meal-card {
-  display: flex;
-  flex-direction: column;
+.empty-state::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
   height: 100%;
-  text-decoration: none;
-  color: var(--color-text);
-  overflow: hidden;
+  background: radial-gradient(circle at center, rgba(124, 58, 237, 0.1), transparent 70%);
+  pointer-events: none;
 }
 
-.meal-card-image {
-  height: 160px;
-  overflow: hidden;
-  border-top-left-radius: var(--radius-lg);
-  border-top-right-radius: var(--radius-lg);
-}
-
-.meal-title {
+.empty-state p {
   font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: var(--space-2);
-  color: var(--color-heading);
-}
-
-.meal-description {
-  color: var(--color-text);
-  line-height: 1.5;
-  margin-bottom: var(--space-3);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.meal-meta {
-  margin-top: auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 0.875rem;
-}
-
-.meal-date {
-  color: var(--color-text-light);
-}
-
-.meal-badge {
-  background-color: var(--color-accent-light);
-  color: var(--color-accent);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-full);
+  margin-bottom: var(--space-6);
   font-weight: 500;
-  font-size: 0.75rem;
+}
+
+.btn-glow {
+  animation: glow 3s infinite alternate;
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 5px rgba(124, 58, 237, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.8);
+  }
 }
 
 /* Responsive adjustments */
-@media (max-width: 640px) {
-  .page-header {
+@media (max-width: 768px) {
+  .header-actions {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
   }
 
-  .meal-card-image {
-    height: 120px;
+  .search-container {
+    max-width: 100%;
+    margin-bottom: var(--space-4);
   }
 }
 </style>
