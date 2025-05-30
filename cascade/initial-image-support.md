@@ -7,7 +7,7 @@
    - [x] Add an `image_url` (or similar) column to the `meals` table to store the image path. *(migration created)*
 
 3. **Backend/Types Update**
-   - [ ] Update TypeScript types to include the meal image URL. *(in progress)*
+   - [x] Update TypeScript types to include the meal image URL. *(done)*
 
 4. **Frontend: Meal Creation**
    - [ ] Add a file input to the meal creation form for image upload.
