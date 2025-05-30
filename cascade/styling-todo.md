@@ -17,9 +17,9 @@
 - [x] Make header/footer responsive
 
 ## Homepage Improvements
-- [ ] Redesign meal cards to show review counts
-- [ ] Improve grid layout for better responsiveness
-- [ ] Add visual indicators for popular meals
+- [x] Redesign meal cards to show review counts
+- [x] Improve grid layout for better responsiveness
+- [x] Add visual indicators for popular meals
 
 ## Image Support
 - [ ] Add image support for meal reviews
