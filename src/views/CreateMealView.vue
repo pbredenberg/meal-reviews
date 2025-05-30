@@ -1,0 +1,152 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useMealsStore } from '@/stores/meals'
+import LoadingSpinner from '@/components/LoadingSpinner.vue'
+
+const router = useRouter()
+const mealsStore = useMealsStore()
+
+const name = ref('')
+const description = ref('')
+const error = ref<string | null>(null)
+const loading = ref(false)
+
+async function handleSubmit() {
+  if (!name.value.trim()) {
+    error.value = 'Name is required'
+    return
+  }
+
+  loading.value = true
+  error.value = null
+
+  try {
+    const result = await mealsStore.createMeal({
+      name: name.value.trim(),
+      description: description.value.trim() || null
+    })
+
+    if (!result.success) {
+      throw new Error(result.error)
+    }
+
+    router.push('/')
+  } catch (e) {
+    error.value = (e as Error).message
+  } finally {
+    loading.value = false
+  }
+}
+</script>
+
+<template>
+  <div class="create-meal">
+    <h1>Add New Meal</h1>
+
+    <form @submit.prevent="handleSubmit" class="meal-form">
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input
+          id="name"
+          v-model="name"
+          type="text"
+          required
+          placeholder="Enter meal name"
+          :disabled="loading"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea
+          id="description"
+          v-model="description"
+          placeholder="Enter meal description"
+          rows="4"
+          :disabled="loading"
+        ></textarea>
+      </div>
+
+      <div v-if="error" class="error">
+        {{ error }}
+      </div>
+
+      <button type="submit" :disabled="loading">
+        <LoadingSpinner v-if="loading" />
+        <span v-else>Add Meal</span>
+      </button>
+    </form>
+  </div>
+</template>
+
+<style scoped>
+.create-meal {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+h1 {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.meal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+label {
+  font-weight: 600;
+}
+
+input,
+textarea {
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.error {
+  color: #dc2626;
+  font-size: 0.875rem;
+}
+
+button {
+  padding: 0.75rem 1.5rem;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+button:hover:not(:disabled) {
+  background-color: #1d4ed8;
+}
+</style>

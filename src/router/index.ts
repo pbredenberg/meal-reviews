@@ -27,6 +27,12 @@ const router = createRouter({
       name: 'profile',
       component: () => import('../views/ProfileView.vue'),
       meta: { requiresAuth: true }
+    },
+    {
+      path: '/meals/new',
+      name: 'create-meal',
+      component: () => import('../views/CreateMealView.vue'),
+      meta: { requiresAuth: true }
     }
   ],
 })

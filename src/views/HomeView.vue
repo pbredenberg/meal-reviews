@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useMealsStore } from '@/stores/meals'
+import { useAuthStore } from '@/stores/auth'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 
 const mealsStore = useMealsStore()
+const authStore = useAuthStore()
 
 onMounted(() => {
   mealsStore.fetchMeals()
@@ -14,6 +16,9 @@ onMounted(() => {
   <main class="meals-container">
     <div class="meals-header">
       <h1>Meal Reviews</h1>
+      <RouterLink v-if="authStore.isAuthenticated" to="/meals/new" class="add-meal-button">
+        Add New Meal
+      </RouterLink>
     </div>
 
     <div v-if="mealsStore.loading" class="loading-container">
@@ -44,12 +49,32 @@ onMounted(() => {
 
 .meals-header {
   margin-bottom: 2rem;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .meals-header h1 {
   font-size: 2rem;
+  margin: 0;
   font-weight: bold;
+}
+
+.add-meal-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid #2563eb;
+  color: white;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.add-meal-button:hover {
+  background-color: #1d4ed8;
 }
 
 .loading-container {
@@ -83,7 +108,6 @@ onMounted(() => {
   padding: 1rem;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-  background-color: white;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
