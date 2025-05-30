@@ -6,6 +6,7 @@ import { useMealsStore } from '@/stores/meals'
 import { useAuthStore } from '@/stores/auth'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import Fuse from 'fuse.js'
+import MealImage from '@/components/MealImage.vue'
 import type { Meal } from '@/types/database'
 
 const router = useRouter()
@@ -39,10 +40,10 @@ const filteredMeals = computed<FilteredMealList>(() => {
 // Format date to a more readable format
 function formatDate(dateString: string): string {
   const date = new Date(dateString)
-  return new Intl.DateTimeFormat('en-US', { 
-    month: 'short', 
-    day: 'numeric', 
-    year: 'numeric' 
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
   }).format(date)
 }
 
@@ -114,9 +115,7 @@ router.afterEach((to) => {
         class="card meal-card"
       >
         <div class="meal-card-image">
-          <div class="meal-placeholder-image">
-            <span>{{ meal.name.charAt(0) }}</span>
-          </div>
+          <MealImage :name="meal.name" :image-url="meal.image_url" :alt-text="meal.name" />
         </div>
         <div class="card-body">
           <h2 class="meal-title">{{ meal.name }}</h2>
@@ -208,27 +207,8 @@ router.afterEach((to) => {
 .meal-card-image {
   height: 160px;
   overflow: hidden;
-  background-color: var(--color-primary-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.meal-placeholder-image {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background-color: var(--color-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.meal-placeholder-image span {
-  font-size: 2rem;
-  font-weight: 700;
-  color: white;
-  text-transform: uppercase;
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
 }
 
 .meal-title {
@@ -276,7 +256,7 @@ router.afterEach((to) => {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .meal-card-image {
     height: 120px;
   }
