@@ -17,15 +17,53 @@ const loading = ref(false)
 
 // New: store selected image file
 const imageFile = ref<File | null>(null)
+const imagePreviewUrl = ref<string | null>(null)
+
+function removePreviewImage() {
+  imageFile.value = null;
+  imagePreviewUrl.value = null;
+  // Also clear the file input value
+  const fileInput = document.getElementById('image') as HTMLInputElement | null;
+  if (fileInput) fileInput.value = '';
+}
 
 function handleImageChange(event: Event) {
   const target = event.target as HTMLInputElement;
-  if (target.files && target.files.length > 0) {
-    imageFile.value = target.files[0];
+  const file = target.files && target.files.length > 0 ? target.files[0] : null;
+
+  // Validation
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+  const maxSize = 2 * 1024 * 1024; // 2MB
+
+  if (file) {
+    if (!allowedTypes.includes(file.type)) {
+      error.value = 'Invalid file type. Only JPEG, PNG, and WEBP are allowed.';
+      imageFile.value = null;
+      imagePreviewUrl.value = null;
+      target.value = '';
+      return;
+    }
+    if (file.size > maxSize) {
+      error.value = 'Image is too large. Maximum size is 2MB.';
+      imageFile.value = null;
+      imagePreviewUrl.value = null;
+      target.value = '';
+      return;
+    }
+    imageFile.value = file;
+    error.value = null;
+    // Preview
+    const reader = new FileReader();
+    reader.onload = e => {
+      imagePreviewUrl.value = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
   } else {
     imageFile.value = null;
+    imagePreviewUrl.value = null;
   }
 }
+
 
 async function handleSubmit() {
   if (!name.value.trim()) {
@@ -117,11 +155,16 @@ async function handleSubmit() {
         <input
           id="image"
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp"
           @change="handleImageChange"
           :disabled="loading"
         />
+        <div v-if="imagePreviewUrl" class="image-preview-wrapper">
+          <img :src="imagePreviewUrl" alt="Image preview" class="image-preview" />
+          <button type="button" class="remove-preview-btn" @click="removePreviewImage" aria-label="Remove image preview">✕</button>
+        </div>
       </div>
+
 
       <button type="submit" :disabled="loading">
         <LoadingSpinner v-if="loading" />
@@ -131,6 +174,7 @@ async function handleSubmit() {
   </div>
 </template>
 
+<style src="../components/ImagePreview.css" scoped></style>
 <style scoped>
 .create-meal {
   max-width: 600px;
@@ -157,14 +201,6 @@ h1 {
 
 label {
   font-weight: 600;
-}
-
-input,
-textarea {
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
 }
 
 textarea {
